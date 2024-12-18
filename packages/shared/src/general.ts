@@ -12,12 +12,24 @@ export const NOOP = (): void => {}
  */
 export const NO = () => false
 
+/**
+ * 判断传入的字符串是否为 "on"
+ *
+ * @param key 待判断的字符串
+ * @returns 如果字符串为 "on"，则返回 true；否则返回 false
+ */
 export const isOn = (key: string): boolean =>
   key.charCodeAt(0) === 111 /* o */ &&
   key.charCodeAt(1) === 110 /* n */ &&
   // uppercase letter
   (key.charCodeAt(2) > 122 || key.charCodeAt(2) < 97)
 
+/**
+ * 判断一个字符串是否是模型监听器的键
+ *
+ * @param key 待判断的字符串
+ * @returns 如果 `key` 是一个以 'onUpdate:' 开头的字符串，则返回 true，否则返回 false
+ */
 export const isModelListener = (key: string): key is `onUpdate:${string}` =>
   key.startsWith('onUpdate:')
 
