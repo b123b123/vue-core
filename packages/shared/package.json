@@ -9,6 +9,13 @@
     "index.js",
     "dist"
   ],
+  "scripts": {
+    "check": "depcruise src --config .dependency-cruiser.cjs",
+    "check-deps": "depcruise src --config ../../.dependency-cruiser.js --output-type dot | dot -T svg > dependency-graph.svg",
+    "check-test": "depcruise src1 --include-only \"^src1\" --output-type dot | dot -T svg > dependency-graph.svg",
+    "check-madge": "madge src  --image graph.svg",
+    "check-madge-npm": "madge src  --image graph.svg --include-npm"
+  },
   "exports": {
     ".": {
       "types": "./dist/shared.d.ts",
