@@ -5,6 +5,14 @@
   "main": "index.js",
   "module": "dist/runtime-core.esm-bundler.js",
   "types": "dist/runtime-core.d.ts",
+  "scripts": {
+    "check": "depcruise src --config .dependency-cruiser.cjs",
+    "check-depcruise": "depcruise src --config ../../.dependency-cruiser.js --include-only \"^src\" --output-type dot | dot -T svg > depcruise-graph.svg",
+    "check-depcruise-npm": "depcruise src --config ../../.dependency-cruiser.js --output-type dot | dot -T svg > depcruise-graph-npm.svg",
+    "check-madge": "madge src --image madge-graph.svg",
+    "check-madge-npm": "madge src --image madge-graph-npm.svg --include-npm",
+    "check-all": "pnpm check-depcruise && pnpm check-depcruise-npm && pnpm check-madge && pnpm check-madge-npm"
+  },
   "files": [
     "index.js",
     "dist"
