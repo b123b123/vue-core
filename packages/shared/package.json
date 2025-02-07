@@ -11,10 +11,10 @@
   ],
   "scripts": {
     "check": "depcruise src --config .dependency-cruiser.cjs",
-    "check-deps": "depcruise src --config ../../.dependency-cruiser.js --output-type dot | dot -T svg > dependency-graph.svg",
-    "check-test": "depcruise src1 --include-only \"^src1\" --output-type dot | dot -T svg > dependency-graph.svg",
-    "check-madge": "madge src  --image graph.svg",
-    "check-madge-npm": "madge src  --image graph.svg --include-npm"
+    "check-depcruise": "depcruise src --config ../../.dependency-cruiser.js --output-type dot | dot -T svg > depcruise-graph-npm.svg",
+    "check-depcruise-npm": "depcruise src --config ../../.dependency-cruiser.js --include-only \"^src1\" --output-type dot | dot -T svg > depcruise-graph.svg",
+    "check-madge": "madge /src --image madge-graph.svg",
+    "check-madge-npm": "madge src  --image madge-npm.svg --include-npm"
   },
   "exports": {
     ".": {

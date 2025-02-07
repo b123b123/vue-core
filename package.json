@@ -44,9 +44,9 @@
     "preinstall": "npx only-allow pnpm",
     "postinstall": "simple-git-hooks",
     "check-": "depcruise src --config .dependency-cruiser.cjs",
-    "check-deps": "depcruise src --output-type dot | dot -T svg > dependency-graph.svg",
+    "check-deps": "depcruise packages/*/src --output-type dot | dot -T svg > dependency-graph.svg",
     "check-test": "depcruise src1 --include-only \"^src1\" --output-type dot | dot -T svg > dependency-graph.svg",
-    "check-madge": "madge src  --image graph.svg",
+    "check-madge": "madge packages/shared/src  --image graph.svg",
     "check-madge-npm": "madge src  --image graph.svg --include-npm"
   },
   "simple-git-hooks": {
