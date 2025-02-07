@@ -1,0 +1,13 @@
+{
+	"includeNpm": false,
+	"fileExtensions": [
+		"js",
+		"ts",
+		"vue"
+	],
+	"tsConfig": "tsconfig.json",
+	"excludeRegExp": [
+		"typings/",
+		"components/__tests__"
+	]
+}
