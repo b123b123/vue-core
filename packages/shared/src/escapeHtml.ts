@@ -1,5 +1,6 @@
 const escapeRE = /["'&<>]/
 
+// 将字符串中的特殊字符转换为 HTML 实体
 export function escapeHtml(string: unknown): string {
   const str = '' + string
   const match = escapeRE.exec(str)
@@ -47,6 +48,7 @@ export function escapeHtml(string: unknown): string {
 // https://www.w3.org/TR/html52/syntax.html#comments
 const commentStripRE = /^-?>|<!--|-->|--!>|<!-$/g
 
+// 去除 HTML 注释中的特殊字符
 export function escapeHtmlComment(src: string): string {
   return src.replace(commentStripRE, '')
 }
@@ -54,6 +56,7 @@ export function escapeHtmlComment(src: string): string {
 export const cssVarNameEscapeSymbolsRE: RegExp =
   /[ !"#$%&'()*+,./:;<=>?@[\\\]^`{|}~]/g
 
+// 转义 CSS 变量名中的特殊字符
 export function getEscapedCssVarName(
   key: string,
   doubleEscape: boolean,
