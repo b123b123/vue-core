@@ -1,23 +1,23 @@
+// 定义一个常量 range，表示代码框架中显示的上下文行数
 const range: number = 2
 
+// 生成代码框架的函数
 export function generateCodeFrame(
-  source: string,
-  start = 0,
-  end: number = source.length,
+  source: string, // 源代码字符串
+  start = 0, // 起始位置，默认为0
+  end: number = source.length, // 结束位置，默认为源代码的长度
 ): string {
-  // Ensure start and end are within the source length
+  // 确保 start 和 end 在源代码的长度范围内
   start = Math.max(0, Math.min(start, source.length))
   end = Math.max(0, Math.min(end, source.length))
 
+  // 如果 start 大于 end，则返回空字符串
   if (start > end) return ''
 
-  // Split the content into individual lines but capture the newline sequence
-  // that separated each line. This is important because the actual sequence is
-  // needed to properly take into account the full line length for offset
-  // comparison
+  // 将内容拆分为单独的行，同时捕获分隔每行的换行符序列
   let lines = source.split(/(\r?\n)/)
 
-  // Separate the lines and newline sequences into separate arrays for easier referencing
+  // 将行和换行符序列分离到单独的数组中，以便更容易引用
   const newlineSequences = lines.filter((_, idx) => idx % 2 === 1)
   lines = lines.filter((_, idx) => idx % 2 === 0)
 
@@ -41,7 +41,7 @@ export function generateCodeFrame(
           (newlineSequences[j] && newlineSequences[j].length) || 0
 
         if (j === i) {
-          // push underline
+          // 添加下划线
           const pad = start - (count - (lineLength + newLineSeqLength))
           const length = Math.max(
             1,
