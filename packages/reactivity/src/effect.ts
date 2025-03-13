@@ -117,10 +117,16 @@ export class ReactiveEffect<T = any>
     }
   }
 
+  /**
+   * 暂停当前 effect 的执行。
+   */
   pause(): void {
     this.flags |= EffectFlags.PAUSED
   }
 
+  /**
+   * 恢复当前 effect 的执行。
+   */
   resume(): void {
     if (this.flags & EffectFlags.PAUSED) {
       this.flags &= ~EffectFlags.PAUSED
@@ -133,6 +139,7 @@ export class ReactiveEffect<T = any>
 
   /**
    * @internal
+   * 通知 effect 进行更新。
    */
   notify(): void {
     if (
@@ -146,6 +153,9 @@ export class ReactiveEffect<T = any>
     }
   }
 
+  /**
+   * 运行当前 effect。
+   */
   run(): T {
     // TODO cleanupEffect
 
@@ -175,6 +185,9 @@ export class ReactiveEffect<T = any>
     }
   }
 
+  /**
+   * 停止当前 effect 的执行。
+   */
   stop(): void {
     if (this.flags & EffectFlags.ACTIVE) {
       for (let link = this.deps; link; link = link.nextDep) {
@@ -187,6 +200,9 @@ export class ReactiveEffect<T = any>
     }
   }
 
+  /**
+   * 触发当前 effect 的执行。
+   */
   trigger(): void {
     if (this.flags & EffectFlags.PAUSED) {
       pausedQueueEffects.add(this)
@@ -199,6 +215,7 @@ export class ReactiveEffect<T = any>
 
   /**
    * @internal
+   * 如果当前 effect 是脏的，则运行它。
    */
   runIfDirty(): void {
     if (isDirty(this)) {
@@ -206,6 +223,9 @@ export class ReactiveEffect<T = any>
     }
   }
 
+  /**
+   * 获取当前 effect 是否是脏的。
+   */
   get dirty(): boolean {
     return isDirty(this)
   }
@@ -232,6 +252,9 @@ let batchDepth = 0
 let batchedSub: Subscriber | undefined
 let batchedComputed: Subscriber | undefined
 
+/**
+ * 批量处理 effect。
+ */
 export function batch(sub: Subscriber, isComputed = false): void {
   sub.flags |= EffectFlags.NOTIFIED
   if (isComputed) {
@@ -245,14 +268,15 @@ export function batch(sub: Subscriber, isComputed = false): void {
 
 /**
  * @internal
+ * 开始批量处理。
  */
 export function startBatch(): void {
   batchDepth++
 }
 
 /**
- * 当所有批处理结束时运行批处理的 effects
  * @internal
+ * 当所有批处理结束时运行批处理的 effects。
  */
 export function endBatch(): void {
   if (--batchDepth > 0) {
@@ -293,6 +317,9 @@ export function endBatch(): void {
   if (error) throw error
 }
 
+/**
+ * 准备 deps 以进行跟踪。
+ */
 function prepareDeps(sub: Subscriber) {
   // 准备跟踪的 deps，从头开始
   for (let link = sub.deps; link; link = link.nextDep) {
@@ -305,6 +332,9 @@ function prepareDeps(sub: Subscriber) {
   }
 }
 
+/**
+ * 清理未使用的 deps。
+ */
 function cleanupDeps(sub: Subscriber) {
   // 清理未使用的 deps
   let head
@@ -333,6 +363,9 @@ function cleanupDeps(sub: Subscriber) {
   sub.depsTail = tail
 }
 
+/**
+ * 检查当前 effect 是否是脏的。
+ */
 function isDirty(sub: Subscriber): boolean {
   for (let link = sub.deps; link; link = link.nextDep) {
     if (
@@ -352,7 +385,7 @@ function isDirty(sub: Subscriber): boolean {
 }
 
 /**
- * 返回 false 表示刷新失败
+ * 返回 false 表示刷新失败。
  * @internal
  */
 export function refreshComputed(computed: ComputedRefImpl): undefined {
@@ -408,6 +441,9 @@ export function refreshComputed(computed: ComputedRefImpl): undefined {
   }
 }
 
+/**
+ * 从 dep 的订阅 effect 列表中移除 link。
+ */
 function removeSub(link: Link, soft = false) {
   const { dep, prevSub, nextSub } = link
   if (prevSub) {
@@ -447,6 +483,9 @@ function removeSub(link: Link, soft = false) {
   }
 }
 
+/**
+ * 从 effect 的 dep 列表中移除 link。
+ */
 function removeDep(link: Link) {
   const { prevDep, nextDep } = link
   if (prevDep) {
@@ -464,6 +503,9 @@ export interface ReactiveEffectRunner<T = any> {
   effect: ReactiveEffect
 }
 
+/**
+ * 创建一个新的 effect 并立即运行它。
+ */
 export function effect<T = any>(
   fn: () => T,
   options?: ReactiveEffectOptions,
@@ -543,6 +585,9 @@ export function onEffectCleanup(fn: () => void, failSilently = false): void {
   }
 }
 
+/**
+ * 清理 effect。
+ */
 function cleanupEffect(e: ReactiveEffect) {
   const { cleanup } = e
   e.cleanup = undefined
