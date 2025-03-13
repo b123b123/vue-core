@@ -12,34 +12,30 @@ import {
 } from './effect'
 
 /**
- * Incremented every time a reactive change happens
- * This is used to give computed a fast path to avoid re-compute when nothing
- * has changed.
+ * 每次发生响应式变化时递增
+ * 这用于为计算属性提供一条快速路径，以避免在没有任何变化时重新计算。
  */
 export let globalVersion = 0
 
 /**
- * Represents a link between a source (Dep) and a subscriber (Effect or Computed).
- * Deps and subs have a many-to-many relationship - each link between a
- * dep and a sub is represented by a Link instance.
+ * 表示源（Dep）和订阅者（Effect 或 Computed）之间的链接。
+ * Deps 和 subs 具有多对多关系 - 每个 dep 和 sub 之间的链接由一个 Link 实例表示。
  *
- * A Link is also a node in two doubly-linked lists - one for the associated
- * sub to track all its deps, and one for the associated dep to track all its
- * subs.
+ * Link 也是两个双向链表中的一个节点 - 一个用于关联的 sub 以跟踪其所有 deps，
+ * 一个用于关联的 dep 以跟踪其所有 subs。
  *
  * @internal
  */
 export class Link {
   /**
-   * - Before each effect run, all previous dep links' version are reset to -1
-   * - During the run, a link's version is synced with the source dep on access
-   * - After the run, links with version -1 (that were never used) are cleaned
-   *   up
+   * - 在每次 effect 运行之前，所有先前的 dep 链接的版本都重置为 -1
+   * - 在运行期间，链接的版本在访问时与源 dep 同步
+   * - 运行结束后，版本为 -1（从未使用过）的链接将被清理
    */
   version: number
 
   /**
-   * Pointers for doubly-linked lists
+   * 双向链表的指针
    */
   nextDep?: Link
   prevDep?: Link
@@ -67,29 +63,29 @@ export class Link {
 export class Dep {
   version = 0
   /**
-   * Link between this dep and the current active effect
+   * 当前活动 effect 与此 dep 之间的链接
    */
   activeLink?: Link = undefined
 
   /**
-   * Doubly linked list representing the subscribing effects (tail)
+   * 表示订阅 effect 的双向链表（尾部）
    */
   subs?: Link = undefined
 
   /**
-   * Doubly linked list representing the subscribing effects (head)
-   * DEV only, for invoking onTrigger hooks in correct order
+   * 表示订阅 effect 的双向链表（头部）
+   * 仅在开发环境中，用于按正确顺序调用 onTrigger 钩子
    */
   subsHead?: Link
 
   /**
-   * For object property deps cleanup
+   * 用于对象属性 deps 清理
    */
   map?: KeyToDepMap = undefined
   key?: unknown = undefined
 
   /**
-   * Subscriber counter
+   * 订阅者计数器
    */
   sc: number = 0
 
@@ -108,7 +104,7 @@ export class Dep {
     if (link === undefined || link.sub !== activeSub) {
       link = this.activeLink = new Link(activeSub, this)
 
-      // add the link to the activeEffect as a dep (as tail)
+      // 将链接添加到 activeEffect 作为 dep（作为尾部）
       if (!activeSub.deps) {
         activeSub.deps = activeSub.depsTail = link
       } else {
@@ -119,12 +115,11 @@ export class Dep {
 
       addSub(link)
     } else if (link.version === -1) {
-      // reused from last run - already a sub, just sync version
+      // 从上次运行中重用 - 已经是 sub，只需同步版本
       link.version = this.version
 
-      // If this dep has a next, it means it's not at the tail - move it to the
-      // tail. This ensures the effect's dep list is in the order they are
-      // accessed during evaluation.
+      // 如果这个 dep 有下一个，意味着它不在尾部 - 将其移动到尾部。
+      // 这确保了 effect 的 dep 列表按评估期间访问的顺序排列。
       if (link.nextDep) {
         const next = link.nextDep
         next.prevDep = link.prevDep
@@ -137,7 +132,7 @@ export class Dep {
         activeSub.depsTail!.nextDep = link
         activeSub.depsTail = link
 
-        // this was the head - point to the new head
+        // 这是头部 - 指向新的头部
         if (activeSub.deps === link) {
           activeSub.deps = next
         }
@@ -168,9 +163,8 @@ export class Dep {
     startBatch()
     try {
       if (__DEV__) {
-        // subs are notified and batched in reverse-order and then invoked in
-        // original order at the end of the batch, but onTrigger hooks should
-        // be invoked in original order here.
+        // subs 被通知并以逆序批处理，然后在批处理结束时按原始顺序调用，
+        // 但 onTrigger 钩子应在此处按原始顺序调用。
         for (let head = this.subsHead; head; head = head.nextSub) {
           if (head.sub.onTrigger && !(head.sub.flags & EffectFlags.NOTIFIED)) {
             head.sub.onTrigger(
@@ -186,9 +180,8 @@ export class Dep {
       }
       for (let link = this.subs; link; link = link.prevSub) {
         if (link.sub.notify()) {
-          // if notify() returns `true`, this is a computed. Also call notify
-          // on its dep - it's called here instead of inside computed's notify
-          // in order to reduce call stack depth.
+          // 如果 notify() 返回 `true`，这是一个计算属性。也调用其 dep 的 notify -
+          // 这里调用而不是在计算属性的 notify 内部调用，以减少调用堆栈深度。
           ;(link.sub as ComputedRefImpl).dep.notify()
         }
       }
@@ -202,8 +195,8 @@ function addSub(link: Link) {
   link.dep.sc++
   if (link.sub.flags & EffectFlags.TRACKING) {
     const computed = link.dep.computed
-    // computed getting its first subscriber
-    // enable tracking + lazily subscribe to all its deps
+    // 计算属性获得其第一个订阅者
+    // 启用跟踪 + 延迟订阅其所有 deps
     if (computed && !link.dep.subs) {
       computed.flags |= EffectFlags.TRACKING | EffectFlags.DIRTY
       for (let l = computed.deps; l; l = l.nextDep) {
@@ -225,10 +218,8 @@ function addSub(link: Link) {
   }
 }
 
-// The main WeakMap that stores {target -> key -> dep} connections.
-// Conceptually, it's easier to think of a dependency as a Dep class
-// which maintains a Set of subscribers, but we simply store them as
-// raw Maps to reduce memory overhead.
+// 存储 {target -> key -> dep} 连接的主要 WeakMap。
+// 从概念上讲，将依赖项视为维护订阅者集合的 Dep 类更容易，但我们只是将它们存储为原始 Map 以减少内存开销。
 type KeyToDepMap = Map<any, Dep>
 
 export const targetMap: WeakMap<object, KeyToDepMap> = new WeakMap()
@@ -244,14 +235,13 @@ export const ARRAY_ITERATE_KEY: unique symbol = Symbol(
 )
 
 /**
- * Tracks access to a reactive property.
+ * 跟踪对响应式属性的访问。
  *
- * This will check which effect is running at the moment and record it as dep
- * which records all effects that depend on the reactive property.
+ * 这将检查当前正在运行的 effect 并将其记录为 dep，记录所有依赖于响应式属性的 effect。
  *
- * @param target - Object holding the reactive property.
- * @param type - Defines the type of access to the reactive property.
- * @param key - Identifier of the reactive property to track.
+ * @param target - 持有响应式属性的对象。
+ * @param type - 定义对响应式属性的访问类型。
+ * @param key - 要跟踪的响应式属性的标识符。
  */
 export function track(target: object, type: TrackOpTypes, key: unknown): void {
   if (shouldTrack && activeSub) {
@@ -278,12 +268,11 @@ export function track(target: object, type: TrackOpTypes, key: unknown): void {
 }
 
 /**
- * Finds all deps associated with the target (or a specific property) and
- * triggers the effects stored within.
+ * 查找与目标（或特定属性）关联的所有 deps 并触发存储在其中的 effects。
  *
- * @param target - The reactive object.
- * @param type - Defines the type of the operation that needs to trigger effects.
- * @param key - Can be used to target a specific reactive property in the target object.
+ * @param target - 响应式对象。
+ * @param type - 定义需要触发 effects 的操作类型。
+ * @param key - 可用于定位目标对象中的特定响应式属性。
  */
 export function trigger(
   target: object,
@@ -295,7 +284,7 @@ export function trigger(
 ): void {
   const depsMap = targetMap.get(target)
   if (!depsMap) {
-    // never been tracked
+    // 从未被跟踪
     globalVersion++
     return
   }
@@ -320,8 +309,8 @@ export function trigger(
   startBatch()
 
   if (type === TriggerOpTypes.CLEAR) {
-    // collection being cleared
-    // trigger all effects for target
+    // 集合被清除
+    // 触发目标的所有 effects
     depsMap.forEach(run)
   } else {
     const targetIsArray = isArray(target)
@@ -339,17 +328,17 @@ export function trigger(
         }
       })
     } else {
-      // schedule runs for SET | ADD | DELETE
+      // 为 SET | ADD | DELETE 调度运行
       if (key !== void 0 || depsMap.has(void 0)) {
         run(depsMap.get(key))
       }
 
-      // schedule ARRAY_ITERATE for any numeric key change (length is handled above)
+      // 为任何数字键更改调度 ARRAY_ITERATE（长度在上面处理）
       if (isArrayIndex) {
         run(depsMap.get(ARRAY_ITERATE_KEY))
       }
 
-      // also run for iteration key on ADD | DELETE | Map.SET
+      // 还为 ADD | DELETE | Map.SET 上的迭代键运行
       switch (type) {
         case TriggerOpTypes.ADD:
           if (!targetIsArray) {
@@ -358,7 +347,7 @@ export function trigger(
               run(depsMap.get(MAP_KEY_ITERATE_KEY))
             }
           } else if (isArrayIndex) {
-            // new index added to array -> length changes
+            // 数组添加新索引 -> 长度变化
             run(depsMap.get('length'))
           }
           break
