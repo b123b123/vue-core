@@ -40,7 +40,7 @@ export let activeSub: Subscriber | undefined
 
 export enum EffectFlags {
   /**
-   * ReactiveEffect only
+   * 仅用于 ReactiveEffect
    */
   ACTIVE = 1 << 0,
   RUNNING = 1 << 1,
@@ -52,16 +52,16 @@ export enum EffectFlags {
 }
 
 /**
- * Subscriber is a type that tracks (or subscribes to) a list of deps.
+ * Subscriber 是一种跟踪（或订阅）deps 列表的类型。
  */
 export interface Subscriber extends DebuggerOptions {
   /**
-   * Head of the doubly linked list representing the deps
+   * 表示 deps 的双向链表的头部
    * @internal
    */
   deps?: Link
   /**
-   * Tail of the same list
+   * 同一链表的尾部
    * @internal
    */
   depsTail?: Link
@@ -74,8 +74,7 @@ export interface Subscriber extends DebuggerOptions {
    */
   next?: Subscriber
   /**
-   * returning `true` indicates it's a computed that needs to call notify
-   * on its dep too
+   * 返回 `true` 表示它是一个需要调用 notify 的 computed
    * @internal
    */
   notify(): true | void
@@ -151,7 +150,7 @@ export class ReactiveEffect<T = any>
     // TODO cleanupEffect
 
     if (!(this.flags & EffectFlags.ACTIVE)) {
-      // stopped during cleanup
+      // 在清理期间停止
       return this.fn()
     }
 
@@ -167,10 +166,7 @@ export class ReactiveEffect<T = any>
       return this.fn()
     } finally {
       if (__DEV__ && activeSub !== this) {
-        warn(
-          'Active effect was not restored correctly - ' +
-            'this is likely a Vue internal bug.',
-        )
+        warn('活动 effect 未正确恢复 - ' + '这可能是 Vue 内部的一个 bug。')
       }
       cleanupDeps(this)
       activeSub = prevEffect
@@ -216,7 +212,7 @@ export class ReactiveEffect<T = any>
 }
 
 /**
- * For debugging
+ * 用于调试
  */
 // function printDeps(sub: Subscriber) {
 //   let d = sub.deps
@@ -255,7 +251,7 @@ export function startBatch(): void {
 }
 
 /**
- * Run batched effects when all batches have ended
+ * 当所有批处理结束时运行批处理的 effects
  * @internal
  */
 export function endBatch(): void {
@@ -284,7 +280,7 @@ export function endBatch(): void {
       e.flags &= ~EffectFlags.NOTIFIED
       if (e.flags & EffectFlags.ACTIVE) {
         try {
-          // ACTIVE flag is effect-only
+          // ACTIVE 标志仅用于 effect
           ;(e as ReactiveEffect).trigger()
         } catch (err) {
           if (!error) error = err
@@ -298,19 +294,19 @@ export function endBatch(): void {
 }
 
 function prepareDeps(sub: Subscriber) {
-  // Prepare deps for tracking, starting from the head
+  // 准备跟踪的 deps，从头开始
   for (let link = sub.deps; link; link = link.nextDep) {
-    // set all previous deps' (if any) version to -1 so that we can track
-    // which ones are unused after the run
+    // 将所有先前 deps 的版本（如果有）设置为 -1，以便我们可以跟踪
+    // 运行后哪些未使用
     link.version = -1
-    // store previous active sub if link was being used in another context
+    // 如果 link 在另一个上下文中被使用，则存储先前的活动 sub
     link.prevActiveLink = link.dep.activeLink
     link.dep.activeLink = link
   }
 }
 
 function cleanupDeps(sub: Subscriber) {
-  // Cleanup unsued deps
+  // 清理未使用的 deps
   let head
   let tail = sub.depsTail
   let link = tail
@@ -318,22 +314,21 @@ function cleanupDeps(sub: Subscriber) {
     const prev = link.prevDep
     if (link.version === -1) {
       if (link === tail) tail = prev
-      // unused - remove it from the dep's subscribing effect list
+      // 未使用 - 从 dep 的订阅 effect 列表中移除它
       removeSub(link)
-      // also remove it from this effect's dep list
+      // 也从此 effect 的 dep 列表中移除它
       removeDep(link)
     } else {
-      // The new head is the last node seen which wasn't removed
-      // from the doubly-linked list
+      // 新的头部是最后一个未从双向链表中移除的节点
       head = link
     }
 
-    // restore previous active link if any
+    // 如果有，恢复先前的活动 link
     link.dep.activeLink = link.prevActiveLink
     link.prevActiveLink = undefined
     link = prev
   }
-  // set the new head & tail
+  // 设置新的头部和尾部
   sub.deps = head
   sub.depsTail = tail
 }
@@ -349,8 +344,7 @@ function isDirty(sub: Subscriber): boolean {
       return true
     }
   }
-  // @ts-expect-error only for backwards compatibility where libs manually set
-  // this flag - e.g. Pinia's testing module
+  // @ts-expect-error 仅用于向后兼容，库手动设置此标志 - 例如 Pinia 的测试模块
   if (sub._dirty) {
     return true
   }
@@ -358,7 +352,7 @@ function isDirty(sub: Subscriber): boolean {
 }
 
 /**
- * Returning false indicates the refresh failed
+ * 返回 false 表示刷新失败
  * @internal
  */
 export function refreshComputed(computed: ComputedRefImpl): undefined {
@@ -370,8 +364,7 @@ export function refreshComputed(computed: ComputedRefImpl): undefined {
   }
   computed.flags &= ~EffectFlags.DIRTY
 
-  // Global version fast path when no reactive changes has happened since
-  // last refresh.
+  // 当自上次刷新以来没有发生反应性变化时，使用全局版本快速路径。
   if (computed.globalVersion === globalVersion) {
     return
   }
@@ -379,10 +372,9 @@ export function refreshComputed(computed: ComputedRefImpl): undefined {
 
   const dep = computed.dep
   computed.flags |= EffectFlags.RUNNING
-  // In SSR there will be no render effect, so the computed has no subscriber
-  // and therefore tracks no deps, thus we cannot rely on the dirty check.
-  // Instead, computed always re-evaluate and relies on the globalVersion
-  // fast path above for caching.
+  // 在 SSR 中不会有渲染 effect，因此 computed 没有订阅者
+  // 因此不跟踪 deps，因此我们不能依赖脏检查。
+  // 相反，computed 总是重新计算并依赖于上面的全局版本快速路径进行缓存。
   if (
     dep.version > 0 &&
     !computed.isSSR &&
@@ -427,21 +419,21 @@ function removeSub(link: Link, soft = false) {
     link.nextSub = undefined
   }
   if (__DEV__ && dep.subsHead === link) {
-    // was previous head, point new head to next
+    // 是先前的头部，指向新的头部
     dep.subsHead = nextSub
   }
 
   if (dep.subs === link) {
-    // was previous tail, point new tail to prev
+    // 是先前的尾部，指向新的尾部
     dep.subs = prevSub
 
     if (!prevSub && dep.computed) {
-      // if computed, unsubscribe it from all its deps so this computed and its
-      // value can be GCed
+      // 如果是 computed，从所有 deps 中取消订阅，以便此 computed 及其
+      // 值可以被 GC
       dep.computed.flags &= ~EffectFlags.TRACKING
       for (let l = dep.computed.deps; l; l = l.nextDep) {
-        // here we are only "soft" unsubscribing because the computed still keeps
-        // referencing the deps and the dep should not decrease its sub count
+        // 这里我们只是“软”取消订阅，因为 computed 仍然保持
+        // 引用 deps，dep 不应减少其 sub 计数
         removeSub(l, true)
       }
     }
@@ -449,9 +441,8 @@ function removeSub(link: Link, soft = false) {
 
   if (!soft && !--dep.sc && dep.map) {
     // #11979
-    // property dep no longer has effect subscribers, delete it
-    // this mostly is for the case where an object is kept in memory but only a
-    // subset of its properties is tracked at one time
+    // 属性 dep 不再有 effect 订阅者，删除它
+    // 这主要是针对对象保留在内存中但一次只跟踪其属性子集的情况
     dep.map.delete(dep.key)
   }
 }
@@ -497,9 +488,9 @@ export function effect<T = any>(
 }
 
 /**
- * Stops the effect associated with the given runner.
+ * 停止与给定 runner 关联的 effect。
  *
- * @param runner - Association with the effect to stop tracking.
+ * @param runner - 与要停止跟踪的 effect 关联。
  */
 export function stop(runner: ReactiveEffectRunner): void {
   runner.effect.stop()
@@ -512,7 +503,7 @@ export let shouldTrack = true
 const trackStack: boolean[] = []
 
 /**
- * Temporarily pauses tracking.
+ * 暂时暂停跟踪。
  */
 export function pauseTracking(): void {
   trackStack.push(shouldTrack)
@@ -520,7 +511,7 @@ export function pauseTracking(): void {
 }
 
 /**
- * Re-enables effect tracking (if it was paused).
+ * 重新启用 effect 跟踪（如果已暂停）。
  */
 export function enableTracking(): void {
   trackStack.push(shouldTrack)
@@ -528,7 +519,7 @@ export function enableTracking(): void {
 }
 
 /**
- * Resets the previous global effect tracking state.
+ * 重置先前的全局 effect 跟踪状态。
  */
 export function resetTracking(): void {
   const last = trackStack.pop()
@@ -536,25 +527,19 @@ export function resetTracking(): void {
 }
 
 /**
- * Registers a cleanup function for the current active effect.
- * The cleanup function is called right before the next effect run, or when the
- * effect is stopped.
+ * 为当前活动的 effect 注册一个清理函数。
+ * 清理函数在下一个 effect 运行之前或 effect 停止时调用。
  *
- * Throws a warning if there is no current active effect. The warning can be
- * suppressed by passing `true` to the second argument.
+ * 如果没有当前活动的 effect，则抛出警告。可以通过传递 `true` 给第二个参数来抑制警告。
  *
- * @param fn - the cleanup function to be registered
- * @param failSilently - if `true`, will not throw warning when called without
- * an active effect.
+ * @param fn - 要注册的清理函数
+ * @param failSilently - 如果为 `true`，则在没有活动 effect 时调用不会抛出警告。
  */
 export function onEffectCleanup(fn: () => void, failSilently = false): void {
   if (activeSub instanceof ReactiveEffect) {
     activeSub.cleanup = fn
   } else if (__DEV__ && !failSilently) {
-    warn(
-      `onEffectCleanup() was called when there was no active effect` +
-        ` to associate with.`,
-    )
+    warn(`onEffectCleanup() 被调用时没有活动的 effect` + ` 进行关联。`)
   }
 }
 
@@ -562,7 +547,7 @@ function cleanupEffect(e: ReactiveEffect) {
   const { cleanup } = e
   e.cleanup = undefined
   if (cleanup) {
-    // run cleanup without active effect
+    // 在没有活动 effect 的情况下运行清理
     const prevSub = activeSub
     activeSub = undefined
     try {
