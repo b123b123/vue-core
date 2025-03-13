@@ -1,3 +1,12 @@
+/*
+  在这个文件中，核心代码主要集中在以下几个部分：
+  ReactiveEffect 类：这是核心类，定义了响应式 effect 的行为，包括运行、暂停、恢复和停止 effect 的方法。
+  effect 函数：这是创建并运行一个新的 effect 的主要入口函数。
+  batch 函数：用于批量处理 effect。
+  startBatch 和 endBatch 函数：用于管理批量处理的开始和结束。
+  isDirty 函数：用于检查 effect 是否是脏的，需要重新运行。
+  cleanupEffect 函数：用于清理 effect。
+*/
 import { extend, hasChanged } from '@vue/shared'
 import type { ComputedRefImpl } from './computed'
 import type { TrackOpTypes, TriggerOpTypes } from './constants'
