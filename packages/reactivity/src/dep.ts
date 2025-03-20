@@ -95,6 +95,11 @@ export class Dep {
     }
   }
 
+  // track 方法：
+  // 检查是否有活动的订阅者（activeSub）和是否应该跟踪（shouldTrack）。
+  // 如果当前没有活动链接（activeLink），则创建一个新的 Link 实例，并将其添加到订阅者的依赖列表中。
+  // 如果链接已经存在但版本为 -1，则更新版本并将其移动到依赖列表的尾部。
+  // 在开发环境中，如果订阅者有 onTrack 钩子，则调用该钩子。
   track(debugInfo?: DebuggerEventExtraInfo): Link | undefined {
     if (!activeSub || !shouldTrack || activeSub === this.computed) {
       return
