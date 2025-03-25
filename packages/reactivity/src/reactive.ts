@@ -34,12 +34,14 @@ export const shallowReadonlyMap: WeakMap<Target, any> = new WeakMap<
   any
 >()
 
+// 定义了一个枚举，用于标识目标对象的类型
 enum TargetType {
-  INVALID = 0,
-  COMMON = 1,
-  COLLECTION = 2,
+  INVALID = 0, // 无效类型
+  COMMON = 1, // 普通对象或数组
+  COLLECTION = 2, // 集合类型（如 Map、Set 等）
 }
 
+// 根据原始类型字符串映射到 TargetType
 function targetTypeMap(rawType: string) {
   switch (rawType) {
     case 'Object':
@@ -55,6 +57,7 @@ function targetTypeMap(rawType: string) {
   }
 }
 
+// 获取目标对象的类型，判断是否可扩展或是否被标记为跳过
 function getTargetType(value: Target) {
   return value[ReactiveFlags.SKIP] || !Object.isExtensible(value)
     ? TargetType.INVALID
@@ -88,15 +91,17 @@ export type Reactive<T> = UnwrapNestedRefs<T> &
  * @param target - The source object.
  * @see {@link https://vuejs.org/api/reactivity-core.html#reactive}
  */
+// reactive 函数：将目标对象转换为深度响应式对象
 export function reactive<T extends object>(target: T): Reactive<T>
 export function reactive(target: object) {
-  // if trying to observe a readonly proxy, return the readonly version.
+  // 如果目标对象是只读的，直接返回
   if (isReadonly(target)) {
     return target
   }
+  // 创建响应式对象
   return createReactiveObject(
     target,
-    false,
+    false, // 非只读
     mutableHandlers,
     mutableCollectionHandlers,
     reactiveMap,
@@ -137,12 +142,13 @@ export type ShallowReactive<T> = T & { [ShallowReactiveMarker]?: true }
  * @param target - The source object.
  * @see {@link https://vuejs.org/api/reactivity-advanced.html#shallowreactive}
  */
+// shallowReactive 函数：创建浅层响应式对象
 export function shallowReactive<T extends object>(
   target: T,
 ): ShallowReactive<T> {
   return createReactiveObject(
     target,
-    false,
+    false, // 非只读
     shallowReactiveHandlers,
     shallowCollectionHandlers,
     shallowReactiveMap,
@@ -202,12 +208,13 @@ export type DeepReadonly<T> = T extends Builtin
  * @param target - The source object.
  * @see {@link https://vuejs.org/api/reactivity-core.html#readonly}
  */
+// readonly 函数：将目标对象转换为深度只读对象
 export function readonly<T extends object>(
   target: T,
 ): DeepReadonly<UnwrapNestedRefs<T>> {
   return createReactiveObject(
     target,
-    true,
+    true, // 只读
     readonlyHandlers,
     readonlyCollectionHandlers,
     readonlyMap,
@@ -244,16 +251,18 @@ export function readonly<T extends object>(
  * @param target - The source object.
  * @see {@link https://vuejs.org/api/reactivity-advanced.html#shallowreadonly}
  */
+// shallowReadonly 函数：创建浅层只读对象
 export function shallowReadonly<T extends object>(target: T): Readonly<T> {
   return createReactiveObject(
     target,
-    true,
+    true, // 只读
     shallowReadonlyHandlers,
     shallowReadonlyCollectionHandlers,
     shallowReadonlyMap,
   )
 }
 
+// 核心函数：创建响应式或只读代理对象
 function createReactiveObject(
   target: Target,
   isReadonly: boolean,
@@ -261,6 +270,7 @@ function createReactiveObject(
   collectionHandlers: ProxyHandler<any>,
   proxyMap: WeakMap<Target, any>,
 ) {
+  // 如果目标不是对象，直接返回
   if (!isObject(target)) {
     if (__DEV__) {
       warn(
@@ -271,24 +281,24 @@ function createReactiveObject(
     }
     return target
   }
-  // target is already a Proxy, return it.
-  // exception: calling readonly() on a reactive object
+  // 如果目标已经是代理对象，直接返回
   if (
     target[ReactiveFlags.RAW] &&
     !(isReadonly && target[ReactiveFlags.IS_REACTIVE])
   ) {
     return target
   }
-  // target already has corresponding Proxy
+  // 如果目标已经有对应的代理对象，直接返回
   const existingProxy = proxyMap.get(target)
   if (existingProxy) {
     return existingProxy
   }
-  // only specific value types can be observed.
+  // 检查目标类型是否有效
   const targetType = getTargetType(target)
   if (targetType === TargetType.INVALID) {
     return target
   }
+  // 创建代理对象
   const proxy = new Proxy(
     target,
     targetType === TargetType.COLLECTION ? collectionHandlers : baseHandlers,
@@ -315,6 +325,7 @@ function createReactiveObject(
  * @param value - The value to check.
  * @see {@link https://vuejs.org/api/reactivity-utilities.html#isreactive}
  */
+// isReactive 函数：检查对象是否是由 reactive 或 shallowReactive 创建的代理
 export function isReactive(value: unknown): boolean {
   if (isReadonly(value)) {
     return isReactive((value as Target)[ReactiveFlags.RAW])
@@ -333,6 +344,7 @@ export function isReactive(value: unknown): boolean {
  * @param value - The value to check.
  * @see {@link https://vuejs.org/api/reactivity-utilities.html#isreadonly}
  */
+// isReadonly 函数：检查对象是否是只读代理
 export function isReadonly(value: unknown): boolean {
   return !!(value && (value as Target)[ReactiveFlags.IS_READONLY])
 }
@@ -348,6 +360,7 @@ export function isShallow(value: unknown): boolean {
  * @param value - The value to check.
  * @see {@link https://vuejs.org/api/reactivity-utilities.html#isproxy}
  */
+// isProxy 函数：检查对象是否是由 reactive、readonly 等创建的代理
 export function isProxy(value: any): boolean {
   return value ? !!value[ReactiveFlags.RAW] : false
 }
@@ -375,6 +388,7 @@ export function isProxy(value: any): boolean {
  * @param observed - The object for which the "raw" value is requested.
  * @see {@link https://vuejs.org/api/reactivity-advanced.html#toraw}
  */
+// toRaw 函数：获取代理对象的原始对象
 export function toRaw<T>(observed: T): T {
   const raw = observed && (observed as Target)[ReactiveFlags.RAW]
   return raw ? toRaw(raw) : observed
@@ -404,6 +418,7 @@ export type Raw<T> = T & { [RawSymbol]?: true }
  * @param value - The object to be marked as "raw".
  * @see {@link https://vuejs.org/api/reactivity-advanced.html#markraw}
  */
+// markRaw 函数：标记对象为原始对象，避免被转换为代理
 export function markRaw<T extends object>(value: T): Raw<T> {
   if (!hasOwn(value, ReactiveFlags.SKIP) && Object.isExtensible(value)) {
     def(value, ReactiveFlags.SKIP, true)
