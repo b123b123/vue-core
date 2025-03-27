@@ -1,0 +1,47 @@
+{
+  "name": "@vue/my-debug",
+  "version": "1.0.0",
+  "description": "@vue/my-debug",
+  "main": "index.js",
+  "module": "dist/my-debug.esm-bundler.js",
+  "types": "dist/my-debug.d.ts",
+  "unpkg": "dist/my-debug.global.js",
+  "jsdelivr": "dist/my-debug.global.js",
+  "files": [
+    "index.js",
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/my-debug.d.ts",
+      "node": {
+        "production": "./dist/my-debug.cjs.prod.js",
+        "development": "./dist/my-debug.cjs.js",
+        "default": "./index.js"
+      },
+      "module": "./dist/my-debug.esm-bundler.js",
+      "import": "./dist/my-debug.esm-bundler.js",
+      "require": "./index.js"
+    },
+    "./*": "./*"
+  },
+  "sideEffects": false,
+  "buildOptions": {
+    "name": "VueDebug",
+    "formats": [
+      "esm-bundler",
+      "esm-browser",
+      "cjs",
+      "global"
+    ]
+  },
+  "keywords": [
+    "vue-debug"
+  ],
+  "author": "Wang Bo",
+  "license": "MIT",
+  "dependencies": {
+    "@vue/shared": "workspace:*",
+    "@vue/reactivity": "workspace:*"
+  }
+}

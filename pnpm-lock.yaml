@@ -351,6 +351,15 @@ importers:
         specifier: workspace:*
         version: link:../shared
 
+  packages/my-debug:
+    dependencies:
+      '@vue/reactivity':
+        specifier: workspace:*
+        version: link:../reactivity
+      '@vue/shared':
+        specifier: workspace:*
+        version: link:../shared
+
   packages/reactivity:
     dependencies:
       '@vue/shared':
