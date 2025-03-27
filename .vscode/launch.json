@@ -6,7 +6,7 @@
       "request": "launch",
       "name": "Debug my-debug",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/packages-private/my-debug/dist/index.js",
+      "program": "${workspaceFolder}/packages-private/my-debug/dist/debug.js",
       "outFiles": [
         // 如果你构建了项目，这里需要指定构建后的文件
         "${workspaceFolder}/packages/**/dist/**/*.js",
