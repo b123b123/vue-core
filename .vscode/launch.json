@@ -4,18 +4,17 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug Reactive",
+      "name": "Debug my-debug",
       "skipFiles": ["<node_internals>/**"],
-      // "program": "${workspaceFolder}/packages/reactivity/debug.ts",
-      "program": "${workspaceFolder}/packages/reactivity/dist-debug/debug.js",
+      "program": "${workspaceFolder}/packages/my-debug/dist/my-debug.cjs",
       "outFiles": [
-        "${workspaceFolder}/packages/reactivity/dist/**/*.js", // 如果你构建了项目
-        "${workspaceFolder}/packages/reactivity/dist-debug/**/*.js"
+        // 如果你构建了项目，这里需要指定构建后的文件
+        "${workspaceFolder}/packages/**/dist/**/*.js"
       ],
       "sourceMaps": true,
-      "cwd": "${workspaceFolder}/packages/reactivity", // 设置当前工作目录
+      "cwd": "${workspaceFolder}/packages", // 设置当前工作目录
       "env": {
-        "NODE_ENV": "development" // 设置为 'development' 或 'production'
+        "NODE_ENV": "development" // 设置为 'development' 或 'production'  这里没有使用
       }
     }
   ]
