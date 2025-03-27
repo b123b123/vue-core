@@ -1,19 +1,22 @@
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
       "type": "node",
       "request": "launch",
-      "name": "Vitest - Debug Current Test File",
-      "autoAttachChildProcesses": true,
-      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-      "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
-      "args": ["run", "${relativeFile}"],
-      "smartStep": true,
-      "console": "integratedTerminal"
+      "name": "Debug Reactive",
+      "skipFiles": ["<node_internals>/**"],
+      // "program": "${workspaceFolder}/packages/reactivity/debug.ts",
+      "program": "${workspaceFolder}/packages/reactivity/dist-debug/debug.js",
+      "outFiles": [
+        "${workspaceFolder}/packages/reactivity/dist/**/*.js", // 如果你构建了项目
+        "${workspaceFolder}/packages/reactivity/dist-debug/**/*.js"
+      ],
+      "sourceMaps": true,
+      "cwd": "${workspaceFolder}/packages/reactivity", // 设置当前工作目录
+      "env": {
+        "NODE_ENV": "development" // 设置为 'development' 或 'production'
+      }
     }
   ]
 }
