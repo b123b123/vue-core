@@ -1,5 +1,5 @@
 // debug.ts
-import { reactive } from '@vue/reactivity'
+import { reactive, watch } from '@vue/reactivity'
 
 const obj = reactive({
   count: 0,
@@ -13,3 +13,14 @@ console.log('After increment:', obj)
 
 obj.nested.value = 'world'
 console.log('After nested update:', obj)
+
+watch(
+  () => obj.count,
+  (count, prevCount) => {
+    console.log(`count: ${prevCount} -> ${count}`)
+  },
+)
+
+setTimeout(() => {
+  obj.count++
+}, 2000)

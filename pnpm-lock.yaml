@@ -207,6 +207,15 @@ importers:
         specifier: workspace:*
         version: link:../../packages/vue
 
+  packages-private/my-debug:
+    dependencies:
+      '@vue/reactivity':
+        specifier: workspace:*
+        version: link:../../packages/reactivity
+      '@vue/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+
   packages-private/sfc-playground:
     dependencies:
       '@vue/repl':
@@ -347,15 +356,6 @@ importers:
       '@vue/compiler-dom':
         specifier: workspace:*
         version: link:../compiler-dom
-      '@vue/shared':
-        specifier: workspace:*
-        version: link:../shared
-
-  packages/my-debug:
-    dependencies:
-      '@vue/reactivity':
-        specifier: workspace:*
-        version: link:../reactivity
       '@vue/shared':
         specifier: workspace:*
         version: link:../shared

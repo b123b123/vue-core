@@ -4,6 +4,7 @@
   "packageManager": "pnpm@9.14.2",
   "type": "module",
   "scripts": {
+    "start": "tsc -p ./packages-private/my-debug/tsconfig.json --watch",
     "dev": "node scripts/dev.js",
     "build": "node scripts/build.js",
     "build-dts": "tsc -p tsconfig.build.json --noCheck && rollup -c rollup.dts.config.js",

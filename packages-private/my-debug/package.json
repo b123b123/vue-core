@@ -1,7 +1,8 @@
 {
-  "name": "@vue/my-debug",
+  "name": "my-debug",
   "version": "1.0.0",
-  "description": "@vue/my-debug",
+  "description": "my-debug",
+  "type": "module",
   "main": "index.js",
   "module": "dist/my-debug.esm-bundler.js",
   "types": "dist/my-debug.d.ts",
@@ -11,6 +12,9 @@
     "index.js",
     "dist"
   ],
+  "scripts": {
+    "start": "tsc -p tsconfig.json --watch"
+  },
   "exports": {
     ".": {
       "types": "./dist/my-debug.d.ts",
