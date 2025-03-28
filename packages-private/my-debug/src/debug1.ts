@@ -8,19 +8,19 @@ export const obj1 = reactive({
 
 console.log('Initial obj1:', obj1)
 
-obj1.count++
+obj1.count1++
 console.log('After increment1:', obj1)
 
-obj1.nested1.value = 'world1'
+obj1.nested1.attr1 = 'world1'
 console.log('After nested update1:', obj1)
 
 // watch(
 //   () => obj1.count1,
 //   (count1, prevCount1) => {
-//     console.log(`count: ${prevCount1} -> ${count1}`)
+//     console.log(`count1: ${prevCount1} -> ${count1}`)
 //   },
 // )
 
 // setTimeout(() => {
-//   obj1.count++
+//   obj1.count1++
 // }, 2000)
