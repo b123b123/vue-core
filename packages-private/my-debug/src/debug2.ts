@@ -3,7 +3,7 @@ import { reactive, watch } from '@vue/reactivity'
 
 export const obj2 = reactive({
   count2: 0,
-  nested2: { value2: 'hello2' },
+  nested2: { attr2: 'hello2' },
 })
 
 console.log('Initial obj2:', obj2)
